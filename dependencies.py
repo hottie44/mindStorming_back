@@ -62,16 +62,19 @@ class Factory:
             }
         })
         self.nextIdx = self.nextIdx + 1
+        self.calPos()
+
+    def calPos(self):
         self.h = [-500] * 10000
         self.h[0] = 0
-        self.createDfs(0, 0, 1, len(self.nodes["0"].data["childs"]))
+        self.calPosDfs(0, 0, 1, len(self.nodes["0"].data["childs"]))
 
-    def createDfs(self, id: int, lv: int, idx: int, cnt: int):
+    def calPosDfs(self, id: int, lv: int, idx: int, cnt: int):
         self.nodes[str(id)].position["x"] = lv * 350
         self.nodes[str(id)].position["y"] = int(max(idx - int(cnt / 2) - 2, self.h[lv] + 1)) * 50
         self.h[lv] = int(max(idx - int(cnt / 2) - 2, self.h[lv] + 1)) + 1
         for child in self.nodes[str(id)].data["childs"]:
-            self.createDfs(child, lv + 1, self.h[lv], len(self.nodes[str(id)].data["childs"]))
+            self.calPosDfs(child, lv + 1, self.h[lv], len(self.nodes[str(id)].data["childs"]))
 
     def update(self, id: int, label: str, color: str, x: int, y: int):
         print(label, color)
@@ -84,6 +87,7 @@ class Factory:
         if id == 0: return
         node = self.nodes[str(id)]
         self.removeDfs(node)
+        self.calPos()
 
     def removeDfs(self, node: Node):
         while node.data["childs"]:
