@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException, APIRouter, WebSocket
 from sqlalchemy.orm import Session
 
 import schemas
+import random
 
 from gensim.models import KeyedVectors
 
@@ -17,10 +18,11 @@ router = APIRouter()
             description='한 단어의 유사한 단어를 반환')
 async def read_users_me(item: schemas.Word):
     try:
-        model_result = loaded_model.most_similar(item.word)
+        model_result = loaded_model.most_similar(positive=[item.word], topn=50)
     except:
         return []
     ret = []
     for word, _ in model_result:
         ret.append(word)
+    a = random.shuffle(ret)
     return ret
