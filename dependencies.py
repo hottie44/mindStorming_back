@@ -62,15 +62,16 @@ class Factory:
             }
         })
         self.nextIdx = self.nextIdx + 1
-        self.h = [0] * 10000
+        self.h = [-500] * 10000
+        self.h[0] = 0
         self.createDfs(0, 0, 1, len(self.nodes["0"].data["childs"]))
 
     def createDfs(self, id: int, lv: int, idx: int, cnt: int):
+        self.nodes[str(id)].position["x"] = lv * 350
+        self.nodes[str(id)].position["y"] = int(max(idx - int(cnt / 2) - 2, self.h[lv] + 1)) * 50
+        self.h[lv] = int(max(idx - int(cnt / 2) - 2, self.h[lv] + 1)) + 1
         for child in self.nodes[str(id)].data["childs"]:
             self.createDfs(child, lv + 1, self.h[lv], len(self.nodes[str(id)].data["childs"]))
-        self.nodes[str(id)].position["x"] = lv * 350
-        self.nodes[str(id)].position["y"] = max(idx - cnt / 2, self.h[lv] + 1) * 50
-        self.h[lv] = max(idx - cnt / 2, self.h[lv] + 1) + 1
 
     def update(self, id: int, label: str, color: str, x: int, y: int):
         print(label, color)
