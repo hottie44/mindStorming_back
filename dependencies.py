@@ -33,8 +33,6 @@ class Node:
             "color": "#FFFFFF"
         }
         self.position =  {"x": 0, "y": 0}
-        self.up = 0
-        self.down = 0
 
 
 class Factory:
@@ -42,6 +40,7 @@ class Factory:
         self.nextIdx = 1
         self.nodes = {"0": Node()}
         self.edges = []
+        self.h = [0] * 10000
 
     def create(self, parent: int, label: str, color: str):
         node = Node()
@@ -53,8 +52,6 @@ class Factory:
         node.type = "myNode"
         self.nodes[str(node.id)] = node
         self.nodes[str(parent)].data["childs"].append(self.nextIdx)
-        self.nodes[str(node.id)].position['x'] += self.nodes[str(parent)].position['x'] + 350
-        self.nodes[str(node.id)].position['y'] += self.nodes[str(parent)].position['y'] + (len(self.nodes[str(parent)].data['childs']) - 1) * 200
         self.edges.append({
             "id": f"e{parent}-{self.nextIdx}",
             "source": str(parent),
@@ -65,14 +62,15 @@ class Factory:
             }
         })
         self.nextIdx = self.nextIdx + 1
-        self.h = 0
+        self.h = [0] * 10000
+        self.createDfs(0, 0, 1, len(self.nodes["0"].data["childs"]))
 
-    def createDfs(self, id: int, lv: int):
-        for child in self.nodes[str(id)].data['childs']:
-            self.createDfs(child, lv + 1)
-        self.nodes[str(id)].data['x'] = lv * 200
-        self.nodes[str(id)].data['y'] = self.h * 100
-        self.h = self.h + 1
+    def createDfs(self, id: int, lv: int, idx: int, cnt: int):
+        for child in self.nodes[str(id)].data["childs"]:
+            self.createDfs(child, lv + 1, self.h[lv], len(self.nodes[str(id)].data["childs"]))
+        self.nodes[str(id)].position["x"] = lv * 350
+        self.nodes[str(id)].position["y"] = max(idx - cnt / 2, self.h[lv] + 1) * 50
+        self.h[lv] = max(idx - cnt / 2, self.h[lv] + 1) + 1
 
     def update(self, id: int, label: str, color: str, x: int, y: int):
         print(label, color)
@@ -82,14 +80,17 @@ class Factory:
         if y: self.nodes[str(id)].position['y'] = y
 
     def remove(self, id: int):
+        if id == 0: return
         node = self.nodes[str(id)]
         self.removeDfs(node)
 
     def removeDfs(self, node: Node):
         while node.data["childs"]:
             self.removeDfs(self.nodes[str(node.data["childs"][0])])
-        self.nodes[str(self.nodes[str(node.id)].data["parent"])].data["childs"].remove(int(node.id))
-        del self.nodes[str(node.id)]
+        if int(node.id) in self.nodes[str(self.nodes[str(node.id)].data["parent"])].data["childs"]:
+            self.nodes[str(self.nodes[str(node.id)].data["parent"])].data["childs"].remove(int(node.id))
+        if str(node.id) in self.nodes:
+            del self.nodes[str(node.id)]
 
 
 
